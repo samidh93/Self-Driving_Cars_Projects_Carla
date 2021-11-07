@@ -158,9 +158,15 @@ class Controller2D(object):
             ######################################################
             ######################################################
             """
-                Implement a longitudinal controller here. Remember that you can
+                Implement a longitudinal controller here (PID). Remember that you can
                 access the persistent variables declared above here. For
                 example, can treat self.vars.v_previous like a "global variable".
+                Formula:
+                u = Kp * (Vd-V) + Ki * (integral(Vd-V)*dt) + Kd * (d(Vd-V)/dt)
+                Throttle pos (Tp) Brake pos (Bp):
+                if u >= 0: Tp = u, Bp = 0
+                if u <= 0: Tp = 0, Bp = -u
+
             """
             
             # Change these outputs with the longitudinal controller. Note that
@@ -201,13 +207,23 @@ class Controller2D(object):
             ######################################################
             ######################################################
             """
-                Implement a lateral controller here. Remember that you can
+                Implement a lateral controller here (stainly). Remember that you can
                 access the persistent variables declared above here. For
                 example, can treat self.vars.v_previous like a "global variable".
+                Stainley controller:
+                Cross track error: 
+                e = (ax_c + by_c + c)/(sqrt(a^2+b²))
+                Cross track steering:
+                tan^-1(k_e/v) # arctan
+                Heading error:
+                psi = tan^-1(-a/b) - teta_c
+                Total steering input:
+                tau = psi + tan^-1(k_e/v)
+
             """
             
             # Change the steer output with the lateral controller. 
-# Use stanley controller for lateral control
+            # Use stanley controller for lateral control
             k_e = 0.3
             slope = (waypoints[-1][1]-waypoints[0][1])/ (waypoints[-1][0]-waypoints[0][0])
             a = -slope
@@ -223,7 +239,7 @@ class Controller2D(object):
             if yaw_diff_heading < - np.pi:
                 yaw_diff_heading += 2 * np.pi
 
-            # crosstrack erroe
+            # crosstrack error
             current_xy = np.array([x, y])
             crosstrack_error = np.min(np.sum((current_xy - np.array(waypoints)[:, :2])**2, axis=1))
             yaw_cross_track = np.arctan2(y-waypoints[0][1], x-waypoints[0][0])
